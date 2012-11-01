@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <WebView
+        android:id="@+id/webview1"
+        android:layout_width="match_parent"
+        android:layout_height="422dp"
+        android:layout_weight="0.70" />
+
+    <RelativeLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Prev" />
+
+        <EditText
+            android:id="@+id/txtEpisode"
+            android:layout_width="96dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:inputType="number"
+            android:text="132" 
+            android:imeOptions="actionDone"
+
+            />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Next" />
+    </RelativeLayout>
+
+</LinearLayout>
