@@ -1,4 +1,4 @@
-package com.thelod.opob;
+package com.thelod.as;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,6 +23,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+
+import com.thelod.as.R;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
