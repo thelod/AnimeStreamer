@@ -4,11 +4,18 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-
+
+    <ListView
+        android:id="@+id/lstSeries"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+    </ListView>
+
     <WebView
         android:id="@+id/webview1"
         android:layout_width="match_parent"
-        android:layout_height="422dp"
+        android:layout_height="match_parent"
         android:layout_weight="0.70" />
 
     <RelativeLayout
@@ -30,10 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:inputType="number"
-            android:text="132" 
-            android:imeOptions="actionDone"
-
-            />
+            android:text="1" 
+            android:imeOptions="actionDone" />
 
         <Button
             android:id="@+id/button2"
