@@ -28,6 +28,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import com.thelod.as.R;
 
@@ -64,6 +67,7 @@ public class OpobActivity extends Activity {
 	
 	private ArrayAdapter<episodeMirror> adapterVideos;
 	private int currentEpisode = 0;
+	private String currentSeries = "";
 	
     /** Called when the activity is first created. */
     @Override
@@ -95,7 +99,8 @@ public class OpobActivity extends Activity {
         	
         });
         
-        
+        adapterSeries.add("loading...");
+        adapterEpisodes.add("loading...");
         listSeries = (ListView)findViewById(R.id.lstSeries);
         listSeries.setAdapter(adapterSeries);
         listSeries.setOnItemClickListener(new OnItemClickListener() {
@@ -105,17 +110,33 @@ public class OpobActivity extends Activity {
 					Log.d("DEBUG", "CurrentView"+currentView);
 					
 					if(currentView == 0){
-						getEpisodes(adapterSeries.getItem(position));
-						listSeries.setAdapter(adapterEpisodes);
-			            currentView = 1;
+						String itemText = adapterSeries.getItem(position);
+						if(itemText == "Click here to retry")
+						{
+							getSeries();
+						}
+						else if(itemText != "Couldn't retrieve list" && itemText != "loading...")
+						{
+							currentSeries = adapterSeries.getItem(position);
+							getEpisodes(currentSeries);
+							listSeries.setAdapter(adapterEpisodes);
+				            currentView = 1;
+						}
 					}
 					else if(currentView == 1){
-						currentEpisode = position;
-						checkNextPrev();
-						loadFlash(getVideos(adapterEpisodes.getItem(position)));
-						listSeries.setVisibility(View.GONE);
-			            currentView = 2;
-						
+						String itemText = adapterEpisodes.getItem(position);
+						if(itemText == "Click here to retry")
+						{
+							getEpisodes(currentSeries);
+						}
+						else if(itemText != "Couldn't retrieve list" && itemText != "loading...")
+						{
+							currentEpisode = position;
+							checkNextPrev();
+							loadFlash(getVideos(adapterEpisodes.getItem(position)));
+							listSeries.setVisibility(View.GONE);
+				            currentView = 2;
+						}
 					}
 						
 				} catch (Exception e) {
@@ -167,7 +188,7 @@ public class OpobActivity extends Activity {
         String test ="";
         try {
 			test = getSeries();
-			mWebView.loadData(test, "text/html; charset=UTF-8", null);
+			mWebView.loadData("loading...", "text/html; charset=UTF-8", null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			test = e.getMessage();
@@ -204,12 +225,13 @@ public class OpobActivity extends Activity {
     public void loadFlash(String flashID)
     {
     	String data = flashID;
-        mWebView.loadData("<script>document.write(unescape('" + data + "'));</script>", "text/html; charset=UTF-8", null);
+        mWebView.loadData("<script>document.write(unescape('" + data + "'));</script><br>" + adapterEpisodes.getItem(currentEpisode), "text/html; charset=UTF-8", null);
     }
     
     public void clearWebView()
     {
-    	mWebView.loadData("blub", "text/html; charset=UTF-8", null);
+        mWebView.clearCache(true);
+    	mWebView.loadData("loading...", "text/html; charset=UTF-8", null);
     }
     
     
@@ -253,7 +275,10 @@ public class OpobActivity extends Activity {
             	adapterEpisodes.add(matcher.toMatchResult().group(1));
                 //res += matcher.toMatchResult().group(0);
             }
-
+            if(adapterEpisodes.isEmpty()){
+            	adapterEpisodes.add("Couldn't retrieve list");
+            	adapterEpisodes.add("Click here to retry");
+            }
             return res;
     }
     
@@ -321,6 +346,10 @@ public class OpobActivity extends Activity {
             		adapterSeries.add(matcher.toMatchResult().group(1));
                 //res += matcher.toMatchResult().group(0);
             }
+            if(adapterSeries.isEmpty()){
+            	adapterSeries.add("Couldn't retrieve list");
+            	adapterSeries.add("Click here to retry");
+            }
             return res;
             
         }
@@ -330,20 +359,34 @@ public class OpobActivity extends Activity {
      */
     public String getWebPage(String address) throws Exception
     {
-    	BufferedReader in = null;
-        HttpClient client = new DefaultHttpClient();
-        HttpGet request = new HttpGet();
-        request.setURI(new URI(address));
-        HttpResponse response = client.execute(request);
-        in = new BufferedReader
-        (new InputStreamReader(response.getEntity().getContent()));
-        StringBuffer sb = new StringBuffer("");
-        String line = "";
-        String NL = System.getProperty("line.separator");
-        while ((line = in.readLine()) != null) {
-            sb.append(line + NL);
-        }
-        in.close();
-        return sb.toString();
+    	try
+    	{
+	    	BufferedReader in = null;
+	    	HttpParams httpParameters = new BasicHttpParams();
+	    	// Set the timeout in milliseconds until a connection is established.
+	    	// The default value is zero, that means the timeout is not used. 
+	    	int timeoutConnection = 5000;
+	    	HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+	        DefaultHttpClient client = new DefaultHttpClient();
+	       	client.setParams(httpParameters);
+	        HttpGet request = new HttpGet();
+	        request.setURI(new URI(address));
+	        HttpResponse response = client.execute(request);
+	        in = new BufferedReader
+	        (new InputStreamReader(response.getEntity().getContent()));
+	        StringBuffer sb = new StringBuffer("");
+	        String line = "";
+	        String NL = System.getProperty("line.separator");
+	        while ((line = in.readLine()) != null) {
+	            sb.append(line + NL);
+	        }
+	        in.close();
+	        return sb.toString();
+    	}
+    	catch(Exception e)
+    	{
+
+    	}
+		return "";
     }
    }
