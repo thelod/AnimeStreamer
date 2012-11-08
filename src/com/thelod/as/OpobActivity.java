@@ -45,7 +45,7 @@ public class OpobActivity extends Activity {
 	private Button buttonNext;
 	private Spinner currentVideos;
 	private ListView listSeries;
-	private ArrayAdapter<String> adapterSeries;
+	private ArrayAdapter<seriesLink> adapterSeries;
 	private ArrayAdapter<String> adapterEpisodes;
 	
 	private int currentView = 0;
@@ -65,6 +65,21 @@ public class OpobActivity extends Activity {
 		}
 	}
 	
+	public class seriesLink{
+		String SeriesName = "";
+		String SeriesLink = "";
+		public seriesLink(String inName, String inLink)
+		{
+			SeriesName = inName;
+			SeriesLink = inLink;
+		}
+		@Override
+		public String toString()
+		{
+			return SeriesName;
+		}
+	}
+	
 	private ArrayAdapter<episodeMirror> adapterVideos;
 	private int currentEpisode = 0;
 	private String currentSeries = "";
@@ -74,7 +89,7 @@ public class OpobActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        adapterSeries = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
+        adapterSeries = new ArrayAdapter<seriesLink>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
         adapterEpisodes = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1);
         adapterVideos = new ArrayAdapter<episodeMirror>(this, R.layout.spinnerlayout, android.R.id.text1);
 
@@ -99,7 +114,7 @@ public class OpobActivity extends Activity {
         	
         });
         
-        adapterSeries.add("loading...");
+        adapterSeries.add(new seriesLink("loading...", ""));
         adapterEpisodes.add("loading...");
         listSeries = (ListView)findViewById(R.id.lstSeries);
         listSeries.setAdapter(adapterSeries);
@@ -110,14 +125,14 @@ public class OpobActivity extends Activity {
 					Log.d("DEBUG", "CurrentView"+currentView);
 					
 					if(currentView == 0){
-						String itemText = adapterSeries.getItem(position);
-						if(itemText == "Click here to retry")
+						String itemText = adapterSeries.getItem(position).SeriesLink;
+						if(itemText == "reload")
 						{
 							getSeries();
 						}
-						else if(itemText != "Couldn't retrieve list" && itemText != "loading...")
+						else if(itemText != "")
 						{
-							currentSeries = adapterSeries.getItem(position);
+							currentSeries = adapterSeries.getItem(position).SeriesLink;
 							getEpisodes(currentSeries);
 							listSeries.setAdapter(adapterEpisodes);
 				            currentView = 1;
@@ -333,22 +348,23 @@ public class OpobActivity extends Activity {
      */
     public String getSeries() throws Exception {
         	//retrieve html code
+    		adapterSeries.add(new seriesLink("Loading...", ""));
         	String page = getWebPage("http://www.animeseason.com/anime-list/");
             
         	//create a regex search pattern which returns the anime list
-            Pattern pattern = Pattern.compile("<a href=\"/([\\w-]+)/\">[^<]+</a>");
+            Pattern pattern = Pattern.compile("<a href=\"/([\\w-]+)/\">([^<]+)</a>");
             Matcher matcher = pattern.matcher(page);
             String res = "";
             adapterSeries.clear();
             while(matcher.find()){
             	String test = matcher.toMatchResult().group(1);
             	if(!test.startsWith("anime-list"))
-            		adapterSeries.add(matcher.toMatchResult().group(1));
+            		adapterSeries.add(new seriesLink(matcher.toMatchResult().group(2), matcher.toMatchResult().group(1)));
                 //res += matcher.toMatchResult().group(0);
             }
             if(adapterSeries.isEmpty()){
-            	adapterSeries.add("Couldn't retrieve list");
-            	adapterSeries.add("Click here to retry");
+            	adapterSeries.add(new seriesLink("Couldn't retrieve list", ""));
+            	adapterSeries.add(new seriesLink("Click here to retry", "reload"));
             }
             return res;
             
